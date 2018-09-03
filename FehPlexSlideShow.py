@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-
-
 import sys
 import time
 import pygame
@@ -10,85 +8,126 @@ import os
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 
-def readconfig(cfgfile='Plex.cfg'):
+##############################################
+def read_config(cfgfile='FehPlexSlideShow.config'):
 
-    PlexConfig = {}
+    fpssConfig = {}
     numtokens = 0
 
-    print("Opening:", cfgfile)
     with open(cfgfile, mode='r') as f:
-        plexconfig = f.read().splitlines()
+        configlines = f.read().splitlines()
     f.close()
 
-    for i in range(0,len(plexconfig)):
-        cline = plexconfig[i].split("=")
-        #print(cline)
+    for i in range(0,len(configlines)):
+        cline = configlines[i].split("=")
 
         if cline[0] == 'PlexUsername':
             print("Plex Username:", cline[1])
-            PlexConfig['plexusername'] = cline[1]
+            fpssConfig['plexusername'] = cline[1]
             numtokens += 1
 
         if cline[0] == 'PlexPassword':
             print("Plex Password:", cline[1])
-            PlexConfig['plexpassword'] = cline[1]
+            fpssConfig['plexpassword'] = cline[1]
             numtokens += 1
 
         if cline[0] == 'PlexServer':
             print("Plex Server:", cline[1])
-            PlexConfig['plexserver'] = cline[1]
+            fpssConfig['plexserver'] = cline[1]
             numtokens += 1
 
         if cline[0] == 'PlexAuthToken':
             print("Plex AuthToken:", cline[1])
-            PlexConfig['plexauthtoken'] = cline[1]
+            fpssConfig['plexauthtoken'] = cline[1]
+            numtokens += 1
+
+        if cline[0] == 'FehPlaylistFile':
+            print("Feh Playlist:", cline[1])
+            fpssConfig['fehplaylistfile'] = cline[1]
             numtokens += 1
 
     if numtokens < 3:
-        print("Missing Plex configuration information")
+        print("Missing FehPlexSlideShow configuration information")
         exit(-2)
 
-    return PlexConfig
+    return fpssConfig
 
-def feh_write_file(feh_playlist='FehPlexSlideShow.playlist'):
-    pass
+####### end read_config
+##############################################
 
 
-# Read in config file for Plex
-PlexConfig = readconfig()
+##############################################
+def get_plex_photos():
+
+    plexPhotos = {}
+    numphotos = 0
+
+    # Loop through all libraries looking for photos
+    for section in plex.library.sections():
+
+        if section.type == 'photo':
+            #print("Name:", section.title, "Type:", section.type)
+
+            for section_item in section.all():
+                #print("iName:", section_item.title, "Type:", section_item.type)
+
+                for photo in section_item.photos():
+                    qobj = plex.query(photo.key)
+                    mpart = qobj[0][0][0].get('key')
+                    photourl=plex.url(mpart, includeToken=True)
+                    #print("PhotoURL:",photourl)
+                    plexPhotos[photo.key] = dict([('title', photo.title), ('url', photourl)])
+
+    return plexPhotos
+
+####### end get_plex_photos
+##############################################
+
+##############################################
+def feh_write_playlist(photos, playlist_file='FehPlexSlideShow.playlist'):
+
+    if len(photos) == 0:
+        print("Empty photos")
+        return False
+
+    with open(playlist_file, mode='w') as f:
+
+        for key in photos.keys():
+            f.write(photos[key]['url'] + '\n')
+
+    f.close()
+
+    return True
+
+####### end feh_write_playlist
+##############################################
+
+##############################################
+def feh_slideshow(playlist_file = 'FehPlexSlideShow.playlist', debugonly = False):
+
+    # feh cmd
+    feh_cmd = 'feh -Z -F -Y -D 7 --cycle-once -f ' + playlist_file
+
+    if debugonly:
+        print("Running command:", feh_cmd)
+
+    else:
+        os.system(feh_cmd)
+
+# end feh_slideshow
+##############################################
+
+# Read in config file
+fpssConfig = read_config('Local.config')
 
 # Use the My Plex Account method of connecting
-account = MyPlexAccount(PlexConfig['plexusername'], PlexConfig['plexpassword'])
-plex = account.resource(PlexConfig['plexserver']).connect()
+account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'])
+plex = account.resource(fpssConfig['plexserver']).connect()
 
-# Loop through all libraries looking for photos
-for section in plex.library.sections():
+# Get the photos
+plexPhotos = get_plex_photos()
 
-    if section.type == 'photo':
-        print("Name:", section.title, "Type:", section.type)
+# Write the feh playlist file
+feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
 
-        for section_item in section.all():
-            print("iName:", section_item.title, "Type:", section_item.type)
-
-            for photo in section_item.photos():
-                print("Photo:", photo.title, "Key:", photo.key, "Media:", photo.media, "ParentKey:", photo.parentKey, "ParentRKey:", photo.parentRatingKey)
-                #print(dir(photo.media))
-                #print(photo.media[0])
-                #print(dir(plex.query(photo.key)))
-                qobj = plex.query(photo.key)
-                #print("Qobj 0:",qobj[0])
-                #print("Qobj 0,0:",qobj[0][0])
-                #print(plex.transcodeImage(qobj[0][0],320,320))
-                mpart = qobj[0][0][0].get('key')
-                #print(plex.url(photo.key))
-
-                photourl=plex.url(mpart, includeToken=True)
-                print("PhotoURL:",photourl)
-
-                #print(mpart, photo.section(), photo.photoalbum())
-                #print(mpart.get('key'))
-                #for i in range(0, len(mpart)):
-                #for i, v in mpart.items():
-                #    print("Key:", i, "Value:", v)
-                #exit()
-                #pmedia = plex.media
+feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
