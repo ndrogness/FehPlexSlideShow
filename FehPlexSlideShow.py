@@ -165,4 +165,5 @@ except KeyboardInterrupt:
     DoRun = False
     proc.kill()
     ssproc.kill()
+    exit()
     #os.system("rm" + fpssConfig['fehplaylistfile'])
