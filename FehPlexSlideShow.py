@@ -138,6 +138,7 @@ account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'])
 plex = account.resource(fpssConfig['plexserver']).connect()
 
 DoRun = True
+FirstTime = True
 
 try:
 
@@ -157,10 +158,10 @@ try:
 
         #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
         ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
-        time.sleep(2)
+        ssproc.wait()
+        #time.sleep(2)
 
 except KeyboardInterrupt:
     DoRun = False
     ssproc.terminate()
-    plex.disconnect()
     #os.system("rm" + fpssConfig['fehplaylistfile'])
