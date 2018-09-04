@@ -7,7 +7,7 @@ This was built to run on a Raspberry Pi but could be used on other system.
 Note: this should installed in /home/pi/FehPlexSlideShow
 cd ~pi && git clone https://github.com/ndrogness/FehPlexSlideShow.git
 
-#Here are prerequisite packages/modules:
+# Prerequisite packages/modules:
 sudo apt-get install imagemagick
 sudo apt-get install feh
 sudo apt-get install xscreensaver
