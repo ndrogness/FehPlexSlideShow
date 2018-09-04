@@ -2,11 +2,9 @@
 
 import sys
 import time
-import pygame
-import random
 import os
 from plexapi.myplex import MyPlexAccount
-from plexapi.server import PlexServer
+import subprocess
 
 ##############################################
 def read_config(cfgfile='FehPlexSlideShow.config'):
@@ -62,6 +60,7 @@ def get_plex_photos():
     plexPhotos = {}
     numphotos = 0
 
+    loading()
     # Loop through all libraries looking for photos
     for section in plex.library.sections():
 
@@ -117,6 +116,17 @@ def feh_slideshow(playlist_file = 'FehPlexSlideShow.playlist', debugonly = False
 # end feh_slideshow
 ##############################################
 
+##############################################
+def loading():
+
+    proc = subprocess.Popen(["feh", "-Z", "-F", "-Y", "FehPlexSlideShow-loading.jpg"])
+    #time.sleep(5)
+    #proc.terminate()
+    return proc
+
+# end loading
+##############################################
+
 # Read in config file
 fpssConfig = read_config('Local.config')
 
@@ -124,11 +134,25 @@ fpssConfig = read_config('Local.config')
 account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'])
 plex = account.resource(fpssConfig['plexserver']).connect()
 
-# Get the photos
-plexPhotos = get_plex_photos()
+try:
 
-# Write the feh playlist file
-feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
+    while True:
 
-feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
-feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
+        # Load splash screen
+        proc = loading()
+
+        # Get the photos
+        plexPhotos = get_plex_photos()
+
+        # Write the feh playlist file
+        feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
+
+        # Terminate splash screen
+        proc.terminate()
+
+        #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
+        feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
+
+except KeyboardInterrupt:
+    plex.disconnect()
+    #os.system("rm" + fpssConfig['fehplaylistfile'])
