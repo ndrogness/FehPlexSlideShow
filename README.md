@@ -22,4 +22,5 @@ Turn off screensaver (Under Preference - xscreensaver preferences to turn off th
 chmod 755 /home/pi/FehPlexSlideShow/AutoRun.sh
 
 Add the following line to the file /home/pi/.config/lxsession/LXDE-pi/autostart:
+
 @/bin/sh /home/pi/FehPlexSlideShow/AutoRun.sh
