@@ -106,7 +106,7 @@ def feh_write_playlist(photos, playlist_file='FehPlexSlideShow.playlist'):
 def feh_slideshow(playlist_file = 'FehPlexSlideShow.playlist', debugonly = False):
 
     # feh cmd
-    feh_cmd = 'feh -Z -F -Y -D 7 --cycle-once -f ' + playlist_file
+    feh_cmd = 'feh -Z -F -Y -D 7 --cycle-once -Y --auto-rotate -f ' + playlist_file
 
     if debugonly:
         print("Running command:", feh_cmd)
@@ -130,4 +130,5 @@ plexPhotos = get_plex_photos()
 # Write the feh playlist file
 feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
 
-feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
+#feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
+feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
