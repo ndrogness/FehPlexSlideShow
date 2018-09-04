@@ -111,7 +111,7 @@ def feh_slideshow(playlist_file = 'FehPlexSlideShow.playlist', debugonly = False
         print("Running command:", feh_cmd)
 
     else:
-        os.system(feh_cmd)
+        #os.system(feh_cmd)
         myproc = subprocess.Popen(["feh", "-Z", "-F", "-Y", "-D 7", "--cycle-once", "--auto-rotate", "-f", playlist_file])
 
     return myproc
@@ -122,10 +122,10 @@ def feh_slideshow(playlist_file = 'FehPlexSlideShow.playlist', debugonly = False
 ##############################################
 def loading():
 
-    proc = subprocess.Popen(["feh", "-Z", "-F", "-Y", "FehPlexSlideShow-loading.jpg"])
+    lproc = subprocess.Popen(["feh", "-Z", "-F", "-Y", "FehPlexSlideShow-loading.jpg"])
     #time.sleep(5)
     #proc.terminate()
-    return proc
+    return lproc
 
 # end loading
 ##############################################
@@ -154,7 +154,7 @@ try:
         feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
 
         # Terminate splash screen
-        proc.terminate()
+        proc.kill()
 
         #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
         ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
@@ -163,5 +163,6 @@ try:
 
 except KeyboardInterrupt:
     DoRun = False
-    ssproc.terminate()
+    proc.kill()
+    ssproc.kill()
     #os.system("rm" + fpssConfig['fehplaylistfile'])
