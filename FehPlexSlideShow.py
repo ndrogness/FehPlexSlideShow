@@ -130,4 +130,4 @@ plexPhotos = get_plex_photos()
 # Write the feh playlist file
 feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
 
-feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
+feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=False)
