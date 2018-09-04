@@ -9,8 +9,11 @@ cd ~pi && git clone https://github.com/ndrogness/FehPlexSlideShow.git
 
 # Prerequisite packages/modules:
 sudo apt-get install imagemagick
+
 sudo apt-get install feh
+
 sudo apt-get install xscreensaver
+
 sudo pip3 install plexapi
 
 # Auto run on Pi Desktop using autologin with username pi:
