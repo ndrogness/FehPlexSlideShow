@@ -112,6 +112,9 @@ def feh_slideshow(playlist_file = 'FehPlexSlideShow.playlist', debugonly = False
 
     else:
         os.system(feh_cmd)
+        myproc = subprocess.Popen(["feh", "-Z", "-F", "-Y", "-D 7", "--cycle-once", "--auto-rotate", "-f", playlist_file])
+
+    return myproc
 
 # end feh_slideshow
 ##############################################
@@ -134,9 +137,11 @@ fpssConfig = read_config('Local.config')
 account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'])
 plex = account.resource(fpssConfig['plexserver']).connect()
 
+DoRun = True
+
 try:
 
-    while True:
+    while DoRun:
 
         # Load splash screen
         proc = loading()
@@ -151,8 +156,11 @@ try:
         proc.terminate()
 
         #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
-        feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
+        ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
+        time.sleep(2)
 
 except KeyboardInterrupt:
+    DoRun = False
+    ssproc.terminate()
     plex.disconnect()
     #os.system("rm" + fpssConfig['fehplaylistfile'])
