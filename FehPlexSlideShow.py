@@ -73,8 +73,9 @@ def get_plex_photos():
                 for photo in section_item.photos():
                     qobj = plex.query(photo.key)
                     mpart = qobj[0][0][0].get('key')
-                    photourl=plex.url(mpart, includeToken=True)
-                    #print("PhotoURL:",photourl)
+                    photourl = plex.url(mpart)
+                    photourl = photourl + '?X-Plex-Token=' + fpssConfig['plexauthtoken']
+                    print("PhotoURL:",photourl)
                     plexPhotos[photo.key] = dict([('title', photo.title), ('url', photourl)])
 
     return plexPhotos
@@ -161,7 +162,7 @@ try:
         ssproc.wait()
         #time.sleep(2)
 
-except KeyboardInterrupt:
+except:
     DoRun = False
     proc.kill()
     ssproc.kill()
