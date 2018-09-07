@@ -135,7 +135,7 @@ def loading():
 fpssConfig = read_config('Local.config')
 
 # Use the My Plex Account method of connecting
-account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'])
+account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], token=fpssConfig['plexauthtoken'])
 plex = account.resource(fpssConfig['plexserver']).connect()
 
 DoRun = True
