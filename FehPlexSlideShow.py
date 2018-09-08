@@ -60,7 +60,7 @@ def get_plex_photos():
     plexPhotos = {}
     numphotos = 0
 
-    loading()
+    #loading()
     # Loop through all libraries looking for photos
     for section in plex.library.sections():
 
@@ -75,7 +75,8 @@ def get_plex_photos():
                     mpart = qobj[0][0][0].get('key')
                     photourl = plex.url(mpart)
                     photourl = photourl + '?X-Plex-Token=' + fpssConfig['plexauthtoken']
-                    print("PhotoURL:",photourl)
+                    photourl2 = plex.url(mpart, includeToken=True)
+                    print("PhotoURL:",photourl, photourl2)
                     plexPhotos[photo.key] = dict([('title', photo.title), ('url', photourl)])
 
     return plexPhotos
@@ -135,8 +136,23 @@ def loading():
 fpssConfig = read_config('Local.config')
 
 # Use the My Plex Account method of connecting
-account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], token=fpssConfig['plexauthtoken'])
-plex = account.resource(fpssConfig['plexserver']).connect()
+#account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], token=fpssConfig['plexauthtoken'], timeout=5)
+account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], timeout=5)
+cons = account.resource(fpssConfig['plexserver']).connections
+print(len(cons), cons, account.resource(fpssConfig['plexserver']).accessToken)
+
+for r in range(0, len(cons)):
+    conr = cons[r]
+    print(dir(conr))
+    print(conr.address, conr.httpuri, conr.protocol, conr.key, conr.uri, conr.local)
+#    print(cons[r])
+#exit()
+
+try:
+    plex = account.resource(fpssConfig['plexserver']).connect()
+except plexapi.exceptions.NotFound:
+    print("Could not connect to plex")
+
 
 DoRun = True
 FirstTime = True
@@ -146,25 +162,26 @@ try:
     while DoRun:
 
         # Load splash screen
-        proc = loading()
+        #proc = loading()
 
         # Get the photos
         plexPhotos = get_plex_photos()
 
         # Write the feh playlist file
         feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
+        exit()
 
         # Terminate splash screen
-        proc.kill()
+        #proc.kill()
 
         #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
-        ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
-        ssproc.wait()
-        #time.sleep(2)
+        #ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
+        #ssproc.wait()
+
 
 except:
     DoRun = False
-    proc.kill()
-    ssproc.kill()
+    #proc.kill()
+    #ssproc.kill()
     exit()
     #os.system("rm" + fpssConfig['fehplaylistfile'])
