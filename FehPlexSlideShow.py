@@ -217,7 +217,7 @@ try:
         # Terminate splash screen
         proc.kill()
 
-        feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
+        #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
         ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
         ssproc.wait()
 
