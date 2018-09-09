@@ -71,24 +71,41 @@ def get_plex_photos():
     for section in plex.library.sections():
 
         if section.type == 'photo':
-            print("Name:", section.title, "Type:", section.type)
+            #print("Name:", section.title, "Type:", section.type)
 
             for section_item in section.all():
-                print("iName:", section_item.title, "Type:", section_item.type)
+                #print("iName:", section_item.title, "Type:", section_item.type)
 
                 for photo in section_item.photos():
+                    # Query for photo key (returns Media Container)
                     qobj = plex.query(photo.key)
-                    mpart = qobj[0][0][0].get('key')
-                    imgurl = plex.transcodeImage(mpart, 400, 400)
-                    print(photo.title, photo.media, photo.key, photo.ratingKey, imgurl)
-                    photourl = plex.url(mpart)
-                    photourl = photourl + '?X-Plex-Token=' + fpssConfig['plexauthtoken']
-                    photourl2 = plex.url(mpart, includeToken=True)
-                    print("PhotoURL:",photourl, photourl2)
 
-                    #This is working on LAN
-                    #plexPhotos[photo.key] = dict([('title', photo.title), ('url', photourl)])
-                    plexPhotos[photo.key] = dict([('title', photo.title), ('url', imgurl)])
+                    # Need media part of media container
+                    mpart = qobj[0][0][0].get('key')
+
+                    # Various Media information
+                    photo_height = qobj[0][0].get('height')
+                    photo_width = qobj[0][0].get('width')
+                    photo_aspect_ratio = qobj[0][0].get('aspectRatio')
+
+                    #if img_width > img_height:
+                    #    print(img_height, img_width, img_aspect_ratio)
+                    #   print(photo.title, photo.media, photo.key, photo.ratingKey, imgurl)
+
+                    # Direct URL to media part (only works when local but useful for debuggin)
+                    photo_direct_url = plex.url(mpart, includeToken=True)
+
+                    # plex.url works when local to PMS, but not public network
+                    #photo_url2 = plex.url(mpart)
+                    #photo_url2 = photo_url2 + '?X-Plex-Token=' + fpssConfig['plexauthtoken']
+                    #print("PhotoURL:",photo_direct_url, photo_url2)
+                    #plexPhotos[photo.key] = dict([('title', photo.title), ('url', photo_direct_url)])
+
+                    # Using transcode call since it works on local and pub networks
+                    photo_url = plex.transcodeImage(mpart, photo_height, photo_width)
+
+                    plexPhotos[photo.key] = dict([('title', photo.title), ('url', photo_url)])
+                    print("Adding", photo.key, photo_direct_url)
 
     return plexPhotos
 
@@ -151,11 +168,11 @@ def get_plex_server():
         #account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], token=fpssConfig['plexauthtoken'], timeout=5)
         account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], timeout=5)
         cons = account.resource(fpssConfig['plexserver']).connections
-        print(len(cons), cons, account.resource(fpssConfig['plexserver']).accessToken)
+        print("Connections available:", len(cons), "Access Token:", account.resource(fpssConfig['plexserver']).accessToken)
 
         for r in range(0, len(cons)):
             conr = cons[r]
-            print(dir(conr))
+            #print(dir(conr))
             print(conr.address, conr.httpuri, conr.protocol, conr.key, conr.uri, conr.local)
             #print(cons[r])
             #exit()
@@ -164,6 +181,7 @@ def get_plex_server():
             pms = account.resource(fpssConfig['plexserver']).connect()
         except plexapi.exceptions.NotFound:
             print("Could not connect to plex")
+            exit(-1)
 
     else:
 
