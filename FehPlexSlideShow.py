@@ -65,12 +65,13 @@ def get_plex_photos():
     for section in plex.library.sections():
 
         if section.type == 'photo':
-            #print("Name:", section.title, "Type:", section.type)
+            print("Name:", section.title, "Type:", section.type)
 
             for section_item in section.all():
-                #print("iName:", section_item.title, "Type:", section_item.type)
+                print("iName:", section_item.title, "Type:", section_item.type)
 
                 for photo in section_item.photos():
+                    print(photo.title, photo)
                     qobj = plex.query(photo.key)
                     mpart = qobj[0][0][0].get('key')
                     photourl = plex.url(mpart)
