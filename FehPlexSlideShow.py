@@ -4,6 +4,7 @@ import sys
 import time
 import os
 from plexapi.myplex import MyPlexAccount
+from plexapi.server import PlexServer
 import subprocess
 
 ##############################################
@@ -44,6 +45,11 @@ def read_config(cfgfile='FehPlexSlideShow.config'):
             fpssConfig['fehplaylistfile'] = cline[1]
             numtokens += 1
 
+        if cline[0] == 'PlexMethod':
+            print("Plex Method:" , cline[1])
+            fpssConfig['plexmethod'] = cline[1]
+            numtokens += 1
+
     if numtokens < 3:
         print("Missing FehPlexSlideShow configuration information")
         exit(-2)
@@ -71,14 +77,18 @@ def get_plex_photos():
                 print("iName:", section_item.title, "Type:", section_item.type)
 
                 for photo in section_item.photos():
-                    print(photo.title, photo)
                     qobj = plex.query(photo.key)
                     mpart = qobj[0][0][0].get('key')
+                    imgurl = plex.transcodeImage(mpart, 400, 400)
+                    print(photo.title, photo.media, photo.key, photo.ratingKey, imgurl)
                     photourl = plex.url(mpart)
                     photourl = photourl + '?X-Plex-Token=' + fpssConfig['plexauthtoken']
                     photourl2 = plex.url(mpart, includeToken=True)
                     print("PhotoURL:",photourl, photourl2)
-                    plexPhotos[photo.key] = dict([('title', photo.title), ('url', photourl)])
+
+                    #This is working on LAN
+                    #plexPhotos[photo.key] = dict([('title', photo.title), ('url', photourl)])
+                    plexPhotos[photo.key] = dict([('title', photo.title), ('url', imgurl)])
 
     return plexPhotos
 
@@ -133,26 +143,41 @@ def loading():
 # end loading
 ##############################################
 
+def get_plex_server():
+
+    PlexMethod = MyPlexAccount
+    if fpssConfig['plexmethod'] == 'MyPlexAccount':
+        # Use the My Plex Account method of connecting
+        #account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], token=fpssConfig['plexauthtoken'], timeout=5)
+        account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], timeout=5)
+        cons = account.resource(fpssConfig['plexserver']).connections
+        print(len(cons), cons, account.resource(fpssConfig['plexserver']).accessToken)
+
+        for r in range(0, len(cons)):
+            conr = cons[r]
+            print(dir(conr))
+            print(conr.address, conr.httpuri, conr.protocol, conr.key, conr.uri, conr.local)
+            #print(cons[r])
+            #exit()
+
+        try:
+            pms = account.resource(fpssConfig['plexserver']).connect()
+        except plexapi.exceptions.NotFound:
+            print("Could not connect to plex")
+
+    else:
+
+        baseurl = fpssConfig['plexmethod']
+        pms = PlexServer(baseurl, fpssConfig['plexauthtoken'])
+
+    return pms
+
+# end get plex server
+##############################################
+
 # Read in config file
 fpssConfig = read_config('Local.config')
-
-# Use the My Plex Account method of connecting
-#account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], token=fpssConfig['plexauthtoken'], timeout=5)
-account = MyPlexAccount(fpssConfig['plexusername'], fpssConfig['plexpassword'], timeout=5)
-cons = account.resource(fpssConfig['plexserver']).connections
-print(len(cons), cons, account.resource(fpssConfig['plexserver']).accessToken)
-
-for r in range(0, len(cons)):
-    conr = cons[r]
-    print(dir(conr))
-    print(conr.address, conr.httpuri, conr.protocol, conr.key, conr.uri, conr.local)
-#    print(cons[r])
-#exit()
-
-try:
-    plex = account.resource(fpssConfig['plexserver']).connect()
-except plexapi.exceptions.NotFound:
-    print("Could not connect to plex")
+plex = get_plex_server()
 
 
 DoRun = True
