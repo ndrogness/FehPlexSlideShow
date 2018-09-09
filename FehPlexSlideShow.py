@@ -206,26 +206,25 @@ try:
     while DoRun:
 
         # Load splash screen
-        #proc = loading()
+        proc = loading()
 
         # Get the photos
         plexPhotos = get_plex_photos()
 
         # Write the feh playlist file
         feh_write_playlist(plexPhotos, playlist_file=fpssConfig['fehplaylistfile'])
-        exit()
 
         # Terminate splash screen
-        #proc.kill()
+        proc.kill()
 
-        #feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
-        #ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
-        #ssproc.wait()
+        feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'], debugonly=True)
+        ssproc = feh_slideshow(playlist_file=fpssConfig['fehplaylistfile'])
+        ssproc.wait()
 
 
 except:
     DoRun = False
-    #proc.kill()
-    #ssproc.kill()
+    proc.kill()
+    ssproc.kill()
     exit()
     #os.system("rm" + fpssConfig['fehplaylistfile'])
