@@ -23,4 +23,4 @@ done
 echo "Network is alive, continuing"
 
 cd /home/pi/FehPlexSlideShow 
-/usr/bin/python3 /home/pi/FehPlexSlideShow/FehPlexSlideShow.py
+/usr/bin/python3 /home/pi/FehPlexSlideShow/FehPlexSlideShow.py 2>&1 >> FehPlexSlideShow.log
