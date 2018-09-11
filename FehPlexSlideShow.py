@@ -195,7 +195,6 @@ def get_plex_server():
 
 # Read in config file
 fpssConfig = read_config('Local.config')
-plex = get_plex_server()
 
 
 DoRun = True
@@ -208,7 +207,10 @@ try:
         # Load splash screen
         proc = loading()
 
-        # Get the photos
+        # Connect to the Plex Server
+        plex = get_plex_server()
+
+        # Get the photos from Plex Server
         plexPhotos = get_plex_photos()
 
         # Write the feh playlist file
